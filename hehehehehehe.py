@@ -1,22 +1,22 @@
-winning_numbers = {10, 11, 8, 1, 5, 20}
-user_name, *user_numbers_str = input().split()
+winnum = {10, 11, 8, 1, 5, 20}
+uname, *unumstr = input().split()
 
-if len(user_numbers_str) != 6:
+if len(unumstr) != 6:
     print("Should be 6 numbers")
     quit()
 
-user_numbers = set()
-for num_str in user_numbers_str:
-    num = int(num_str)
-    if num in user_numbers:
-        print("No duplicates allowed.")
+unum = set()
+for numstr in unumstr:
+    num = int(numstr)
+    if num in unum:
+        print("No Duplicates.")
         quit()
-    user_numbers.add(num)
+    unum.add(num)
 
-num_matched = len(winning_numbers & user_numbers)
-prize_money = num_matched * 100
+nummatched = len(winnum & unum)
+prizemoney = nummatched * 100
 
-if num_matched > 0:
-    print(f"{user_name} has won {prize_money} pesos!")
+if nummatched > 0:
+    print(f"{uname} won {prizemoney} pesos!")
 else:
-    print(f"{user_name} won nothing!")
+    print(f"{uname} won nothing!")
