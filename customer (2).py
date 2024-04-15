@@ -12,7 +12,7 @@ def product():
     window2 = tk.Tk()
     window2.title("Python window")
     window2.geometry("1050x400")
-    window2.configure(bg="white")
+    window2.configure(bg="lightgrey")
 
     valid_quan = False
     valid_digit = False
