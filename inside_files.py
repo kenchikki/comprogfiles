@@ -1,6 +1,6 @@
 linenum = int(input())
 output = {'line': 0, 's': 0, 'c': 0, 'u': 0, 'o': 0}
-with open('', 'r') as file_obj:
+with open('tweets2.txt', 'r') as file_obj:
     lines = file_obj.readlines()
     if 1 <= linenum <= len(lines):
         line = lines[linenum - 1].strip()
