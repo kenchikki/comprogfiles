@@ -3,8 +3,17 @@ from tkinter import messagebox
 import re
 import time
 import csv
+import random
+from reportlab.lib.pagesizes import letter
+from reportlab.platypus import SimpleDocTemplate, Table, TableStyle, Spacer, Paragraph
+from reportlab.lib.styles import getSampleStyleSheet
+from reportlab.lib import colors
+from reportlab.pdfgen.canvas import Canvas
+from io import BytesIO
 import os
 import subprocess
+import random
+from PyPDF2 import PdfReader, PdfWriter
 
 lst = [['ID', 'Name', 'Address', 'Phone', 'Email', 'Bday', 'Gender']]
 prods = [['Prod ID', 'Type', 'Description', 'Supplier', 'Quantity', 'Total Cost', 'Received']]
@@ -25,7 +34,127 @@ quant2 = None
 tcost2 = None
 dreceived2 = None
 
-##for the produc//
+
+def print_to_pdf():
+    global lstindex, orders
+
+    if lstindex is None or len(orders) == 0:
+        messagebox.showerror("Error", "Please select a customer with orders.")
+        return
+
+    selected_customer_orders = [order for order in orders if order[0] == str(lst[lstindex][0])]
+
+    if len(selected_customer_orders) == 0:
+        messagebox.showerror("Error", "No orders found for the selected customer.")
+        return
+
+    if not os.path.exists("C:\\docs"):
+        os.makedirs("C:\\docs")
+
+    invoice_number = random.randint(1000, 9999)
+
+    buffer = BytesIO()
+    doc = SimpleDocTemplate("C:\\docs\\sales_invoice.pdf", pagesize=letter)
+    styles = getSampleStyleSheet()
+
+    # Store Information
+    store_name = "Kenchikki's Tech Emporium Inc."
+    store_address = "#7, East Block, Davao Global Township, Davao City."
+    store_contact = "0942-035-6709"
+    store_email = "shop@kenchikkitech.com"
+
+    # Store Information Paragraph
+    store_info_text = f"<b>{store_name}</b><br/>{store_address}<br/>Contact: {store_contact}<br/>Email: {store_email}<br/><br/>"
+    store_info = Paragraph(store_info_text, styles["Normal"])
+
+    # Invoice Title
+    title_text = "SALES INVOICE"
+    title = Paragraph(title_text, styles["title"])
+
+    # Customer Information
+    customer_name = lst[lstindex][1]
+    customer_address = lst[lstindex][2]
+    customer_phone = lst[lstindex][3]
+
+    # Customer Information Paragraph
+    customer_info_text = f"Sold To <br/>Customer Name: {customer_name}<br/>Customer Address: {customer_address}<br/>Customer Phone: {customer_phone}<br/><br/>"
+    customer_info = Paragraph(customer_info_text, styles["Normal"])
+
+    # Order Summary Title
+    order_summary_title = "ORDER SUMMARY"
+    order_summary_title = Paragraph(order_summary_title, styles["Heading2"])
+
+    # Order Summary Table
+    table_data = [["Product Type", "Description", "Quantity", "Unit Price", "Total"]]
+    for order in selected_customer_orders:
+        product_type = order[2]
+        description = order[3]
+        quantity = int(order[4])
+        price = float(order[5])
+        total = quantity * price
+        table_data.append([product_type, description, quantity, f"PHP {price:.2f}", f"PHP {total:.2f}"])
+
+    # Define table style
+    table_style = [('GRID', (0, 0), (-1, -1), 1, colors.black)]
+
+    # Create the table
+    order_summary_table = Table(table_data)
+    order_summary_table.setStyle(TableStyle(table_style))
+
+    # Sub-total
+    sub_total = sum(float(order[5]) * int(order[4]) for order in selected_customer_orders)
+    sub_total_text = f"Sub-total: PHP {sub_total:.2f}"
+    sub_total_para = Paragraph(sub_total_text, styles["Normal"])
+
+    # VAT
+    vat_rate = 0.12
+    total_vat = sub_total * vat_rate
+    vat_text = f"VAT (12%): PHP {total_vat:.2f}"
+    vat_para = Paragraph(vat_text, styles["Normal"])
+
+    # Total
+    total = sub_total + total_vat
+    total_text = f"<b>Total: PHP {total:.2f}</b>"
+    total_para = Paragraph(total_text, styles["Normal"])
+
+    # Footer
+    footer_text = "Our products are backed by a 30-day return policy and a comprehensive 2-year warranty for your peace of mind. For any inquiries or assistance, please keep this invoice contact us at 0942-035-6709."
+    footer = Paragraph(footer_text, styles["Normal"])
+
+    elements = [store_info, Spacer(1, 20), title, Spacer(1, 20), customer_info, Spacer(1, 20),
+                order_summary_title, order_summary_table, Spacer(1, 20),
+                sub_total_para, vat_para, total_para, Spacer(1, 20), footer]
+
+    doc.build(elements)
+
+    # Add the invoice number to the PDF
+    packet = BytesIO()
+    can = Canvas(packet, pagesize=letter)
+    invoice_number_text = f"Invoice Number: {invoice_number}"
+    can.drawString(450, 800, invoice_number_text)
+    can.save()
+
+    # Move to the beginning of the StringIO buffer
+    packet.seek(0)
+
+    new_pdf = PdfReader(packet)
+    existing_pdf = PdfReader(open("C:\\docs\\sales_invoice.pdf", "rb"))
+    output = PdfWriter()
+
+    # Add the "watermark" (which is the new pdf) on the existing page
+    page = existing_pdf.pages[0]
+    page.merge_page(new_pdf.pages[0])
+    output.add_page(page)
+
+    # Finally, write "output" to a real file
+    outputStream = open("C:\\docs\\sales_invoice.pdf", "wb")
+    output.write(outputStream)
+    outputStream.close()
+
+    # Open the PDF file
+    subprocess.Popen(['start', 'C:\\docs\\sales_invoice.pdf'], shell=True)
+
+
 
 def products():
     global prodindex
@@ -788,6 +917,9 @@ delbtn.grid(column=2, row=10)
 
 updbtn = tk.Button(text="Update", command=update)
 updbtn.grid(column=3, row=10)
+
+printbtn = tk.Button(window, text="Print to PDF", command=print_to_pdf)
+printbtn.grid(column=4, row=10)
 
 ordersgrid(0)
 creategrid(0)
