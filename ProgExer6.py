@@ -1,6 +1,9 @@
 import tkinter as tk
 from tkinter import messagebox
 import re
+import csv
+
+
 i = 1
 x = 0
 window2 = None
@@ -44,9 +47,6 @@ def keyupdate(a) :
 def msgbox2(msg,titlebar):
 	result=messagebox.askokcancel(title=titlebar,message=msg)
 	return result
-#-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=
-
-
 #-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=
 def products():
 
@@ -420,6 +420,15 @@ def creategrid(n):
 
 	ordersgrid(1)
 	ordersgrid(0)
+
+def save_customer_csv():
+    with open('customers.csv', 'w', newline='') as csvfile:
+        fieldnames = ['Customer ID', 'Email', 'Phone', 'Name', 'Address', 'Birthdate', 'Gender']
+        writer = csv.DictWriter(csvfile, fieldnames=fieldnames)
+
+        writer.writeheader()
+        for row in lst:
+            writer.writerow({'Customer ID': row[0], 'Email': row[1], 'Phone': row[2], 'Name': row[3], 'Address': row[4], 'Birthdate': row[5], 'Gender': row[6]})
 #-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=	
 def ordersgrid(n):
 	if n == 0:
@@ -435,7 +444,23 @@ def ordersgrid(n):
 		for label in window.grid_slaves():
 			if int(label.grid_info()["row"]) >len(lst) + 16:
 				label.grid_forget()
-	
+
+def save_order_csv():
+    with open('orders.csv', 'w', newline='') as csvfile:
+        fieldnames = ['Order ID', 'Customer ID', 'Product Type', 'Description', 'Supplier', 'Quantity', 'Cost', 'Date Ordered', 'Total Cost']
+        writer = csv.DictWriter(csvfile, fieldnames=fieldnames)
+
+        writer.writeheader()
+        for row in orders:
+            writer.writerow({'Order ID': row[0], 'Customer ID': row[1], 'Product Type': row[2], 'Description': row[3], 'Supplier': row[4], 'Quantity': row[5], 'Cost': row[6], 'Date Ordered': row[7], 'Total Cost': row[8]})
+def save_product_csv():
+    with open('products.csv', 'w', newline='') as csvfile:
+        fieldnames = ['Product ID', 'Type', 'Description', 'Supplier', 'Quantity', 'Cost', 'Date Received']
+        writer = csv.DictWriter(csvfile, fieldnames=fieldnames)
+
+        writer.writeheader()
+        for row in prodlst:
+            writer.writerow({'Product ID': row[0], 'Type': row[1], 'Description': row[2], 'Supplier': row[3], 'Quantity': row[4], 'Cost': row[5], 'Date Received': row[6]})
 #lmao lmao lmao lmao lmao lmao lmao lmao lmao lmao lmao lmao lmao lmao lmao lmao lmao lmao lmao lmao lmao lmao lmao lmao lmao lmao lmao lmao lmao lmao lmao lmao lmao lmao lmao lmao lmao lmao lmao lmao 
 def addorder():
 	global myid, lstindex
@@ -737,6 +762,8 @@ Update.grid(column=3,row=11)
 
 ordersgrid(0)
 creategrid(0)
-
+save_customer_csv()
+save_order_csv()
+save_product_csv()
 
 window.mainloop()
